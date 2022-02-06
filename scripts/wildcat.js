@@ -45,7 +45,9 @@ class Wildcat {
         if (this.jumps > 0) {
             this.yvel = -12;
             this.jumps--;
+            jumpSound.play();
         }
+
     }
 
 
