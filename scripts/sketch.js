@@ -40,7 +40,7 @@ let transitionTo;
 const TRANSITION_DURATION = 1;
 
 // scores
-let score = 1000;
+let score = 0;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
