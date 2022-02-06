@@ -11,6 +11,12 @@ let birdFrames = [];
 let crowFrames = [];
 let clouds = [];
 
+let backgroundImage;
+let roadImage;
+let obstacleImage;
+let flyingObstacleFrames;
+let backgroundMusic;
+
 // sounds
 let failSound;
 let scoreSound;
@@ -22,13 +28,19 @@ let gameMusicTunnel;
 let pressStartFont;
 
 // variables
-let roadOffset = 0;
-let roadSpeed = -10;
-let paused = false;
+const DEFAULT_ROAD_SPEED = -10;
 const NUM_OBSTACLES = 3;
+let roadOffset = 0;
+let roadSpeed = DEFAULT_ROAD_SPEED;
+let paused = false;
+
+// transition
+let transitionTime = 0;
+let transitionTo;
+const TRANSITION_DURATION = 1;
 
 // scores
-let score = 0;
+let score = 1000;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
@@ -82,26 +94,31 @@ function setup() {
 
     wildcat = new Wildcat(100, height*WILDCAT_VERTICAL_CONSTRAINT_FACTOR, 120);
 
+    // setup sounds and images
+    backgroundImage = bgTunnelImage;
+    roadImage = roadTunnelImage;
+    obstacleImage = coneImage;
+    flyingObstacleFrames = birdFrames;
+    backgroundMusic = gameMusicTunnel;
+
     for (let i = 0; i < NUM_OBSTACLES; i++) {
-        const xoff = randomRange(400, 1000)
-        obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, coneImage) );
+        const xoff = randomRange(800, 1000)
+        obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, obstacleImage) );
     }
 
-    gameMusicTunnel.play();
+    backgroundMusic.play();
 
     imageMode(CENTER);
     textFont(pressStartFont);
     textAlign(CENTER);
-
-    // TODO: switch scene at 1050
 }
 
 function draw() {
     background(220);
 
     // background
-    image(bgTunnelImage, width/2, height/2, width, height);
-    image(roadTunnelImage, width + roadOffset, height/2, width*2, height);
+    image(backgroundImage, width/2, height/2, width, height);
+    image(roadImage, width + roadOffset, height/2, width*2, height);
 
     // score text
     if (blinkFrames > 0) {
@@ -121,6 +138,46 @@ function draw() {
     }
 
     if (paused) {
+        
+        // transition
+        if (transitionTo) {
+            score += 8/60;
+            transitionTime -= 1/60;
+            
+            const alpha = Math.sin(transitionTime/TRANSITION_DURATION*Math.PI);
+            background(`rgba(0, 0, 0, ${alpha})`);
+            
+            // show wildcat
+            wildcat.show();
+
+            if (transitionTime <= 0) {
+                if (transitionTo == "grass") {
+                    backgroundImage = bgGrassImage;
+                    roadImage = roadGrassImage;
+                    obstacleImage = treeImage;
+                    flyingObstacleFrames = crowFrames;
+                    backgroundMusic = gameMusicGrass;
+
+                    // update obstacles
+                    for (let i = 0; i < NUM_OBSTACLES; i++) {
+                        const xoff = randomRange(800, 1000)
+                        obstacles[i].x = width*2 + xoff*i;
+                        obstacles[i].y = height*.85;
+                        obstacles[i].frame = obstacleImage;
+                        obstacles[i].size = 150;
+                    }
+                    lastObstacle = obstacles[NUM_OBSTACLES-1];
+
+                    transitionTo = null;
+                    paused = false;
+
+                    gameMusicGrass.play();
+                }
+            }
+
+            return;
+        }
+
         // show wildcat & obstacles
         wildcat.show();
         for (obstacle of obstacles)
@@ -146,6 +203,14 @@ function draw() {
     } else
         flashCooldown -= 1/60;
 
+    // transition
+    if (Math.floor(score) == 1050) {
+        paused = true;
+        transitionTime = TRANSITION_DURATION;
+        transitionTo = "grass";
+        gameMusicTunnel.stop();
+    }
+
     // handle road movement
     roadOffset += roadSpeed;
     if (roadOffset <= -width)
@@ -153,20 +218,20 @@ function draw() {
 
     // handle obstacles
     for (obstacle of obstacles) {
-        obstacle.show();
         obstacle.update();
+        obstacle.show();
     }
 
     // handle wildcat
-    wildcat.show();
     wildcat.update();
+    wildcat.show();
 }
 
 function keyPressed() {
     if (keyCode == 32) {
         wildcat.jump();
         
-        if (paused)
+        if (paused && !transitionTo)
             restart();
     }
 }
@@ -178,23 +243,35 @@ function gameOver() {
     if (score > highScore)
         highScore = Math.floor(score);
     failSound.play();
-    gameMusicTunnel.stop();
+    backgroundMusic.stop();
 }
 
 function restart() {
     paused = false;
 
-    gameMusicTunnel.play();
+    // reset scene
+    backgroundImage = bgTunnelImage;
+    roadImage = roadTunnelImage;
+    obstacleImage = coneImage;
+    flyingObstacleFrames = birdFrames;
+    backgroundMusic = gameMusicTunnel;
+    backgroundMusic.play();
 
     for (let i = 0; i < NUM_OBSTACLES; i++) {
-        const xoff = randomRange(400, 1000)
+        const xoff = randomRange(800, 1000)
         obstacles[i].x = width*2 + xoff*i;
+        obstacles[i].y = height*.86;
+        obstacles[i].frame = obstacleImage;
+        obstacles[i].size = 120;
     }
     lastObstacle = obstacles[NUM_OBSTACLES-1];
     
     score = 0;
     flashCooldown = MAX_FLASH_COOLDOWN;
+    roadSpeed = DEFAULT_ROAD_SPEED;
 }
+
+
 
 
 
