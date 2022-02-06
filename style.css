@@ -3,6 +3,18 @@ body {
     padding: 0;
     box-sizing: border-box;
     background: darkslateblue;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
 }
 
+canvas {
+    display: block;
+    box-shadow: 1px 2px 5px black;
+}
 
+#p5_loading {
+    font-weight: bold;
+    color: white;
+}
