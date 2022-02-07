@@ -204,7 +204,7 @@ function draw() {
         flashCooldown -= 1/60;
 
     // transition
-    if (Math.floor(score) == 1050) {
+    if (Math.floor(score) == 350) {
         paused = true;
         transitionTime = TRANSITION_DURATION;
         transitionTo = "grass";
