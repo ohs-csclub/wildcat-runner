@@ -34,6 +34,7 @@ const NUM_OBSTACLES = 3;
 let roadOffset = 0;
 let roadSpeed = DEFAULT_ROAD_SPEED;
 let paused = false;
+let started = false;
 
 // transition
 let transitionTime = 0;
@@ -110,8 +111,6 @@ function setup() {
         obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, obstacleImage) );
     }
 
-    backgroundMusic.play();
-
     imageMode(CENTER);
     textFont(pressStartFont);
     textAlign(CENTER);
@@ -123,6 +122,19 @@ function draw() {
     // background
     image(backgroundImage, width/2, height/2, width, height);
     image(roadImage, width + roadOffset, height/2, width*2, height);
+
+    if (!started) {
+        fill(255);
+        textSize(35);
+        text('Wildcat\nRunner\n2022', width/2, height*.3);
+
+        fill(`rgba(255, 255, 255, ${.45*Math.sin(millis()*.002)+.55})`);
+        textSize(12);
+        text('Press space to start', width/2, height*.62);
+
+        wildcat.show();
+        return;
+    }
 
     // score text
     if (blinkFrames > 0) {
@@ -233,10 +245,12 @@ function draw() {
 
 function keyPressed() {
     if (keyCode == 32) {
-        wildcat.jump();
-        
-        if (paused && !transitionTo)
-            restart();
+        if (!started) {
+            started = true;
+            backgroundMusic.play();
+        }
+
+        handleJump();
     }
 }
 
@@ -244,6 +258,17 @@ function touchStarted() {
     if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)
         return;
 
+    if (!started) {
+        started = true;
+        backgroundMusic.play();
+    }
+
+    handleJump();
+}
+
+
+
+function handleJump() {
     if (paused && !transitionTo)
         restart();
     else

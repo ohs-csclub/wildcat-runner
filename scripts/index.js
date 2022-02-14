@@ -4,6 +4,13 @@ window.addEventListener('resize', () => {
     resizeCanvas(w, h);
 });
 
+document.addEventListener('visibilitychange', (e) => {
+    if (backgroundMusic.isPaused() && !paused)
+        backgroundMusic.play();
+    else if (backgroundMusic.isPlaying())
+        backgroundMusic.pause();
+})
+
 document.querySelector('#music').addEventListener('click', (e) => {
     const button = e.target;
     
