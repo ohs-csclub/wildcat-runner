@@ -11,18 +11,19 @@ let birdFrames = [];
 let crowFrames = [];
 let clouds = [];
 
-let backgroundImage;
-let roadImage;
-let obstacleImage;
-let flyingObstacleFrames;
-let backgroundMusic;
-
 // sounds
 let failSound;
 let scoreSound;
 let jumpSound;
 let gameMusicGrass;
 let gameMusicTunnel;
+
+// general variables
+let backgroundImage;
+let roadImage;
+let obstacleImage;
+let flyingObstacleFrames;
+let backgroundMusic;
 
 // font
 let pressStartFont;
@@ -90,7 +91,10 @@ function preload() {
 function setup() {
     const w = window.innerWidth * .8;
     const h = window.innerHeight * .8;
+
     createCanvas(w, h);
+    const canvas = document.querySelector('canvas');
+    document.querySelector('.container').appendChild(canvas);
 
     wildcat = new Wildcat(100, height*WILDCAT_VERTICAL_CONSTRAINT_FACTOR, 120);
 
@@ -234,6 +238,16 @@ function keyPressed() {
         if (paused && !transitionTo)
             restart();
     }
+}
+
+function touchStarted() {
+    if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)
+        return;
+
+    if (paused && !transitionTo)
+        restart();
+    else
+        wildcat.jump();
 }
 
 

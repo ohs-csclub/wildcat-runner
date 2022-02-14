@@ -5,7 +5,13 @@ body {
     background: darkslateblue;
     width: 100vw;
     height: 100vh;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
     display: grid;
+    position: absolute;
     place-items: center;
 }
 
@@ -18,3 +24,24 @@ canvas {
     font-weight: bold;
     color: white;
 }
+
+#music {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: .5rem;
+    font-size: 2rem;
+    color: lightblue;
+    cursor: pointer;
+    filter: brightness(0.8);
+    transition: 200ms;
+}
+
+#music:hover {
+    filter: brightness(0.9);
+}
+
+#music:active {
+    filter: brightness(1);
+}
+
