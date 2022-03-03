@@ -1,4 +1,4 @@
-const SWITCH_FRAME_TIME = 0.2;
+const WILDCAT_FRAME_TIME = 0.2;
 const GRAVITY = 0.5;
 const WILDCAT_VERTICAL_CONSTRAINT_FACTOR = 0.86;
 const MAX_JUMPS = 1;
@@ -13,7 +13,7 @@ class Wildcat {
 
         this.size = size;
         this.frame = 0;
-        this.frameTime = SWITCH_FRAME_TIME;
+        this.frameTime = WILDCAT_FRAME_TIME;
     }
 
     show() {
@@ -28,7 +28,7 @@ class Wildcat {
             this.frameTime -= 1/60;
             if (this.frameTime <= 0) {
                 this.frame = (this.frame == 1) ? 0 : 1;
-                this.frameTime = SWITCH_FRAME_TIME;
+                this.frameTime = WILDCAT_FRAME_TIME;
             }
         }
 

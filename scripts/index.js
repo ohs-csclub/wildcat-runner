@@ -23,6 +23,8 @@ document.querySelector('#music').addEventListener('click', (e) => {
         failSound.setVolume(0);
         jumpSound.setVolume(0);
         scoreSound.setVolume(0);
+
+        muted = true;
     // unmute
     } else {
         button.classList.remove('fa-volume-xmark');
@@ -32,6 +34,8 @@ document.querySelector('#music').addEventListener('click', (e) => {
         failSound.setVolume(1);
         jumpSound.setVolume(1);
         scoreSound.setVolume(1);
+
+        muted = false;
     }
 })
 

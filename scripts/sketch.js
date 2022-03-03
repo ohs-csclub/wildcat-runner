@@ -7,7 +7,6 @@ let treeImage;
 let coneImage;
 let retryImage;
 let wildcatFrames = [];
-let birdFrames = [];
 let crowFrames = [];
 let clouds = [];
 
@@ -35,6 +34,7 @@ let roadOffset = 0;
 let roadSpeed = DEFAULT_ROAD_SPEED;
 let paused = false;
 let started = false;
+let muted = false;
 
 // transition
 let transitionTime = 0;
@@ -53,6 +53,7 @@ let hideScores = false;
 // objects
 let wildcat;
 let obstacles = [];
+let bird;
 
 
 function preload() {
@@ -68,8 +69,6 @@ function preload() {
     // frames
     wildcatFrames[0] = loadImage('./assets/wildcat.png');
     wildcatFrames[1] = loadImage('./assets/wildcat2.png');
-    birdFrames[0] = loadImage('./assets/bird.png');
-    birdFrames[1] = loadImage('./assets/bird2.png');
     crowFrames[0] = loadImage('./assets/crow.png');
     crowFrames[1] = loadImage('./assets/crow2.png');
 
@@ -93,6 +92,7 @@ function setup() {
     const w = window.innerWidth * .8;
     const h = window.innerHeight * .8;
 
+    // configure width and height
     createCanvas(w, h);
     const canvas = document.querySelector('canvas');
     document.querySelector('.container').appendChild(canvas);
@@ -103,13 +103,16 @@ function setup() {
     backgroundImage = bgTunnelImage;
     roadImage = roadTunnelImage;
     obstacleImage = coneImage;
-    flyingObstacleFrames = birdFrames;
+    flyingObstacleFrames = crowFrames;
     backgroundMusic = gameMusicTunnel;
 
+    // create obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = randomRange(800, 1000)
         obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, obstacleImage) );
     }
+
+    bird = new Bird(width*3, height*.7, 100, flyingObstacleFrames, false);
 
     imageMode(CENTER);
     textFont(pressStartFont);
@@ -123,6 +126,7 @@ function draw() {
     image(backgroundImage, width/2, height/2, width, height);
     image(roadImage, width + roadOffset, height/2, width*2, height);
 
+    // display starting title card
     if (!started) {
         fill(255);
         textSize(35);
@@ -144,6 +148,7 @@ function draw() {
             hideScores = !hideScores;
     }
 
+    // display high scores or not
     if (!hideScores) {
         fill(255);
         textSize(12);
@@ -174,6 +179,9 @@ function draw() {
                     flyingObstacleFrames = crowFrames;
                     backgroundMusic = gameMusicGrass;
 
+                    if (muted)
+                        backgroundMusic.setVolume(0);
+
                     // update obstacles
                     for (let i = 0; i < NUM_OBSTACLES; i++) {
                         const xoff = randomRange(800, 1000)
@@ -182,12 +190,13 @@ function draw() {
                         obstacles[i].frame = obstacleImage;
                         obstacles[i].size = 150;
                     }
-                    lastObstacle = obstacles[NUM_OBSTACLES-1];
+                    bird.x = lastObstacle.x + 1000;
+                    lastObstacle = bird;
+
+                    bird.enabled = true;
 
                     transitionTo = null;
                     paused = false;
-
-                    gameMusicGrass.play();
                 }
             }
 
@@ -198,6 +207,7 @@ function draw() {
         wildcat.show();
         for (obstacle of obstacles)
             obstacle.show();
+        bird.show();
 
         // show end screen
         textSize(30);
@@ -209,6 +219,7 @@ function draw() {
         return;
     }
 
+    // updating score
     score += 8/60;
     if (flashCooldown <= 0 && Math.floor(score) % 100 == 0) {
         scoreSound.play();
@@ -237,6 +248,10 @@ function draw() {
         obstacle.update();
         obstacle.show();
     }
+
+    // handle bird
+    bird.update();
+    bird.show();
 
     // handle wildcat
     wildcat.update();
@@ -292,7 +307,7 @@ function restart() {
     backgroundImage = bgTunnelImage;
     roadImage = roadTunnelImage;
     obstacleImage = coneImage;
-    flyingObstacleFrames = birdFrames;
+    flyingObstacleFrames = crowFrames;
     backgroundMusic = gameMusicTunnel;
     backgroundMusic.play();
 
@@ -303,7 +318,10 @@ function restart() {
         obstacles[i].frame = obstacleImage;
         obstacles[i].size = 120;
     }
-    lastObstacle = obstacles[NUM_OBSTACLES-1];
+    bird.x = width*2;
+    lastObstacle = bird;
+
+    bird.enabled = false;
     
     score = 0;
     flashCooldown = MAX_FLASH_COOLDOWN;
