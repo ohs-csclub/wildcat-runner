@@ -42,7 +42,7 @@ let transitionTo;
 const TRANSITION_DURATION = 1;
 
 // scores
-let score = 0;
+let score = 340;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
@@ -108,7 +108,7 @@ function setup() {
 
     // create obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
-        const xoff = randomRange(800, 1000)
+        const xoff = random(800, 1000)
         obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, obstacleImage) );
     }
 
@@ -117,6 +117,14 @@ function setup() {
     imageMode(CENTER);
     textFont(pressStartFont);
     textAlign(CENTER);
+
+    // mute
+    if (muted) {
+        backgroundMusic.setVolume(0);
+        failSound.setVolume(0);
+        jumpSound.setVolume(0);
+        scoreSound.setVolume(0);
+    }
 }
 
 function draw() {
@@ -173,10 +181,14 @@ function draw() {
 
             if (transitionTime <= 0) {
                 if (transitionTo == "grass") {
+                    
+                    // change images
                     backgroundImage = bgGrassImage;
                     roadImage = roadGrassImage;
                     obstacleImage = treeImage;
                     flyingObstacleFrames = crowFrames;
+
+                    // change bgm
                     backgroundMusic = gameMusicGrass;
 
                     if (muted)
@@ -184,13 +196,13 @@ function draw() {
 
                     // update obstacles
                     for (let i = 0; i < NUM_OBSTACLES; i++) {
-                        const xoff = randomRange(800, 1000)
+                        const xoff = random(800, 1000)
                         obstacles[i].x = width*2 + xoff*i;
                         obstacles[i].y = height*.85;
                         obstacles[i].frame = obstacleImage;
                         obstacles[i].size = 150;
                     }
-                    bird.x = lastObstacle.x + 1000;
+                    bird.x = obstacles[NUM_OBSTACLES-1].x + random(300, 800);
                     lastObstacle = bird;
 
                     bird.enabled = true;
@@ -312,7 +324,7 @@ function restart() {
     backgroundMusic.play();
 
     for (let i = 0; i < NUM_OBSTACLES; i++) {
-        const xoff = randomRange(800, 1000)
+        const xoff = random(800, 1000)
         obstacles[i].x = width*2 + xoff*i;
         obstacles[i].y = height*.86;
         obstacles[i].frame = obstacleImage;
@@ -331,8 +343,3 @@ function restart() {
 
 
 
-
-// utility
-function randomRange(min, max) {
-    return Math.random()*(max - min) + min;
-}

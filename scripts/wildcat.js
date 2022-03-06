@@ -42,13 +42,11 @@ class Wildcat {
     }
 
     jump() {
-        if (this.jumps > 0) {
-            this.yvel = -12;
-            this.jumps--;
-            jumpSound.play();
-        }
+        if (this.jumps <= 0) return;
 
+        this.yvel = -12;
+        this.jumps--;
+        jumpSound.play();
     }
-
 
 }

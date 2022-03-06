@@ -11,9 +11,8 @@ document.addEventListener('visibilitychange', (e) => {
         backgroundMusic.pause();
 })
 
-document.querySelector('#music').addEventListener('click', (e) => {
-    const button = e.target;
-    
+const button = document.getElementById('music');
+button.addEventListener('click', (e) => {
     // mute
     if (button.classList.contains('fa-volume-high')) {
         button.classList.remove('fa-volume-high');
@@ -25,6 +24,7 @@ document.querySelector('#music').addEventListener('click', (e) => {
         scoreSound.setVolume(0);
 
         muted = true;
+        localStorage.setItem('muted', true);
     // unmute
     } else {
         button.classList.remove('fa-volume-xmark');
@@ -36,7 +36,15 @@ document.querySelector('#music').addEventListener('click', (e) => {
         scoreSound.setVolume(1);
 
         muted = false;
+        localStorage.setItem('muted', false);
     }
 })
 
+
+// on load
+muted = localStorage.getItem('muted') == 'true';
+if (muted) {
+    button.classList.remove('fa-volume-high');
+    button.classList.add('fa-volume-xmark');
+}
 

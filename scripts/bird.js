@@ -12,6 +12,8 @@ class Bird {
         this.frames = frames;
         this.frameTime = BIRD_FRAME_TIME;
         lastObstacle = this;
+
+        this.randomOffset = random(-800, -300);
     }
 
     show() {
@@ -30,10 +32,11 @@ class Bird {
 
         this.x += roadSpeed;
 
-        if (this.x < -this.size) {
-            const xoff = random(600, 1200);
+        if (this.x < this.randomOffset) {
+            const xoff = random(400, 550);
             this.x = lastObstacle.x + xoff;
             lastObstacle = this;
+            this.randomOffset = random(-2400, -400);
         }
 
         // check collision

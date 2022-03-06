@@ -1,4 +1,6 @@
 let lastObstacle;
+let obstacleMinOff = 600;
+let obstacleMaxOff = 800;
 
 class Obstacle {
 
@@ -18,7 +20,7 @@ class Obstacle {
         this.x += roadSpeed;
 
         if (this.x < -this.size) {
-            const xoff = random(600, 1200);
+            const xoff = random(obstacleMinOff, obstacleMaxOff);
             this.x = lastObstacle.x + xoff;
             lastObstacle = this;
         }
