@@ -23,13 +23,18 @@ canvas {
 #p5_loading {
     font-weight: bold;
     color: white;
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
 }
 
-#music {
+#music, #pause {
     position: absolute;
     top: 0;
     left: 0;
-    margin: .5rem;
+    margin: .5rem 1rem;
     font-size: 2rem;
     color: lightblue;
     cursor: pointer;
@@ -37,11 +42,16 @@ canvas {
     transition: 200ms;
 }
 
-#music:hover {
+#pause {
+    left: unset;
+    right: 0;
+}
+
+#music:hover, #pause:hover {
     filter: brightness(0.9);
 }
 
-#music:active {
+#music:active, #pause:hover {
     filter: brightness(1);
 }
 

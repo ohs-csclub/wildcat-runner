@@ -1,3 +1,5 @@
+// finish: 1450
+
 // images
 let bgTunnelImage;
 let bgGrassImage;
@@ -33,6 +35,7 @@ const NUM_OBSTACLES = 3;
 let roadOffset = 0;
 let roadSpeed = DEFAULT_ROAD_SPEED;
 let paused = false;
+let over = false;
 let started = false;
 let muted = false;
 
@@ -42,7 +45,7 @@ let transitionTo;
 const TRANSITION_DURATION = 1;
 
 // scores
-let score = 340;
+let score = 0;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
@@ -166,54 +169,30 @@ function draw() {
             text(`${Math.floor(score).toString().padStart(5, '0')}`, width*0.9, height*0.1);
     }
 
-    if (paused) {
+    // transition
+    if (transitionTo) {
+        score += 8/60;
+        transitionTime -= 1/60;
         
-        // transition
-        if (transitionTo) {
-            score += 8/60;
-            transitionTime -= 1/60;
-            
-            const alpha = Math.sin(transitionTime/TRANSITION_DURATION*Math.PI);
-            background(`rgba(0, 0, 0, ${alpha})`);
-            
-            // show wildcat
-            wildcat.show();
+        const alpha = Math.max(0, Math.sin(transitionTime/TRANSITION_DURATION*Math.PI));
+        background(`rgba(0, 0, 0, ${alpha})`);
+        
+        // show wildcat
+        wildcat.show();
 
-            if (transitionTime <= 0) {
-                if (transitionTo == "grass") {
-                    
-                    // change images
-                    backgroundImage = bgGrassImage;
-                    roadImage = roadGrassImage;
-                    obstacleImage = treeImage;
-                    flyingObstacleFrames = crowFrames;
-
-                    // change bgm
-                    backgroundMusic = gameMusicGrass;
-
-                    if (muted)
-                        backgroundMusic.setVolume(0);
-
-                    // update obstacles
-                    for (let i = 0; i < NUM_OBSTACLES; i++) {
-                        const xoff = random(800, 1000)
-                        obstacles[i].x = width*2 + xoff*i;
-                        obstacles[i].y = height*.85;
-                        obstacles[i].frame = obstacleImage;
-                        obstacles[i].size = 150;
-                    }
-                    bird.x = obstacles[NUM_OBSTACLES-1].x + random(300, 800);
-                    lastObstacle = bird;
-
-                    bird.enabled = true;
-
-                    transitionTo = null;
-                    paused = false;
-                }
-            }
-
-            return;
+        if (transitionTime <= .5 && transitionTo == "grass") {
+            switchToGrass();
+            transitionTo = "end";
+        } else if (transitionTime <= 0) {
+            transitionTo = null;
+            paused = false;
         }
+
+        return;
+    }
+
+    // paused
+    if (paused) {
 
         // show wildcat & obstacles
         wildcat.show();
@@ -221,12 +200,11 @@ function draw() {
             obstacle.show();
         bird.show();
 
-        // show end screen
-        textSize(30);
-        text('Game Over', width/2, height/2);
-
-        // show end icon
-        image(retryImage, width/2, height*.55);
+        // show game over text
+        if (over)
+            gameOverText();
+        else
+            pauseText();
 
         return;
     }
@@ -253,7 +231,7 @@ function draw() {
     // handle road movement
     roadOffset += roadSpeed;
     if (roadOffset <= -width)
-        roadOffset = 0;
+        roadOffset += width;
 
     // handle obstacles
     for (obstacle of obstacles) {
@@ -270,17 +248,21 @@ function draw() {
     wildcat.show();
 }
 
+// handle keys
 function keyPressed() {
     if (keyCode == 32) {
-        if (!started) {
+        if (!started && backgroundMusic != undefined) {
             started = true;
             backgroundMusic.play();
         }
 
         handleJump();
+    } else if (started && (keyCode == 27 || keyCode == 80)) {
+        pause(!paused);
     }
 }
 
+// handle touch
 function touchStarted() {
     if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)
         return;
@@ -294,7 +276,7 @@ function touchStarted() {
 }
 
 
-
+// handle jumping
 function handleJump() {
     if (paused && !transitionTo)
         restart();
@@ -303,15 +285,32 @@ function handleJump() {
 }
 
 
+// pause the game
+function pause(toggle) {
+    if (!started)
+        return;
 
+    paused = toggle;
+
+    if (toggle) {
+        backgroundMusic.setVolume(0);
+    } else if (!muted) {
+        backgroundMusic.setVolume(1);
+    }
+}
+
+
+// declare game over
 function gameOver() {
-    paused = true;
+    pause(true);
+    over = true;
     if (score > highScore)
         highScore = Math.floor(score);
     failSound.play();
-    backgroundMusic.stop();
 }
 
+
+// restart the game
 function restart() {
     paused = false;
 
