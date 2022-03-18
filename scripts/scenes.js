@@ -19,6 +19,8 @@ function pauseText() {
 
 // switch to grass scene
 function switchToGrass() {
+    scene = 'grass';
+
     // change images
     backgroundImage = bgGrassImage;
     roadImage = roadGrassImage;
@@ -27,22 +29,26 @@ function switchToGrass() {
 
     // change bgm
     backgroundMusic = gameMusicGrass;
+    backgroundMusic.stop();
+    backgroundMusic.play();
 
-    if (muted)
-        backgroundMusic.setVolume(0);
+    if (!muted)
+        backgroundMusic.setVolume(1);
     else
-        backgroundMusic.play();
+        backgroundMusic.setVolume(0);
 
     // update obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = random(800, 1000)
         obstacles[i].x = width*2 + xoff*i;
-        obstacles[i].y = height*.85;
+        obstacles[i].y = height*currentSizing["trees"];
         obstacles[i].frame = obstacleImage;
-        obstacles[i].size = 150;
+        obstacles[i].size = currentSizing["treeSize"];
     }
     bird.x = obstacles[NUM_OBSTACLES-1].x + random(300, 800);
     lastObstacle = bird;
+
+    bird.y = height*currentSizing["bird"];
 
     bird.enabled = true;
 }

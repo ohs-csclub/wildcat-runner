@@ -1,6 +1,5 @@
 const WILDCAT_FRAME_TIME = 0.2;
 const GRAVITY = 0.5;
-const WILDCAT_VERTICAL_CONSTRAINT_FACTOR = 0.86;
 const MAX_JUMPS = 1;
 
 class Wildcat {
@@ -35,10 +34,10 @@ class Wildcat {
         this.y += this.yvel;
         this.yvel += GRAVITY;
 
-        if (this.y >= height*WILDCAT_VERTICAL_CONSTRAINT_FACTOR) {
+        if (this.y >= height*currentSizing['wildcat']) {
             this.jumps = MAX_JUMPS;
         }
-        this.y = constrain(this.y, this.size, height*WILDCAT_VERTICAL_CONSTRAINT_FACTOR);
+        this.y = constrain(this.y, this.size, height*currentSizing['wildcat']);
     }
 
     jump() {

@@ -1,7 +1,37 @@
+// get elements
+const modal = document.querySelector('.modal');
+
+
+// when resized/changed orientation
 window.addEventListener('resize', () => {
     const w = window.innerWidth * .8;
     const h = window.innerHeight * .8;
     resizeCanvas(w, h);
+
+    pause(true);
+
+    if (window.innerHeight > window.innerWidth) {
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+
+        determineSizes();
+        
+        // apply sizes
+        wildcat.size = currentSizing["wildcatSize"];
+        wildcat.y = height*currentSizing["wildcat"];
+        bird.y = height*currentSizing["bird"];
+        for (let o of obstacles) {
+            if (scene == "tunnel") {
+                o.y = height*currentSizing["cones"];
+                o.size = currentSizing["coneSize"];
+            }
+            else {
+                o.y = height*currentSizing["trees"]
+                o.size = currentSizing["treeSize"];
+            }
+        }
+    }
 });
 
 document.addEventListener('visibilitychange', (e) => {
@@ -42,7 +72,7 @@ button.addEventListener('click', (e) => {
 
 const pauseButton = document.getElementById('pause');
 pauseButton.addEventListener('click', () => {
-    if (!started)
+    if (!started || over)
         return;
 
     // pause
@@ -67,4 +97,13 @@ if (muted) {
     button.classList.remove('fa-volume-high');
     button.classList.add('fa-volume-xmark');
 }
+
+
+// detect mobile orientation
+if (window.innerHeight > window.innerWidth) {
+    modal.classList.remove('hidden');
+}
+
+
+
 

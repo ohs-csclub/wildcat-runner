@@ -38,6 +38,7 @@ let paused = false;
 let over = false;
 let started = false;
 let muted = false;
+let scene = 'tunnel';
 
 // transition
 let transitionTime = 0;
@@ -57,6 +58,50 @@ let hideScores = false;
 let wildcat;
 let obstacles = [];
 let bird;
+
+// sizes
+const sizes = {
+    "small": {
+        "cones": 0.86,
+        "trees": 0.85,
+        "bird": 0.47,
+        "wildcat": 0.86,
+        "wildcatSize": 100,
+        "birdSize": 80,
+        "coneSize": 100,
+        "treeSize": 130,
+        "titleSize": 25,
+        "hiScore": .8
+    },
+    "medium": {
+        "cones": 0.86,
+        "trees": 0.85,
+        "bird": 0.55,
+        "wildcat": 0.86,
+        "wildcatSize": 110,
+        "birdSize": 90,
+        "coneSize": 110,
+        "treeSize": 140,
+        "titleSize": 30,
+        "hiScore": .83
+    },
+    "large": {
+        "cones": 0.86,
+        "trees": 0.85,
+        "bird": 0.65,
+        "wildcat": 0.86,
+        "wildcatSize": 120,
+        "birdSize": 100,
+        "coneSize": 120,
+        "treeSize": 150,
+        "titleSize": 35,
+        "hiScore": .856
+    }
+}
+let currentSizing;
+
+// determine sizing
+determineSizes();
 
 
 function preload() {
@@ -100,7 +145,7 @@ function setup() {
     const canvas = document.querySelector('canvas');
     document.querySelector('.container').appendChild(canvas);
 
-    wildcat = new Wildcat(100, height*WILDCAT_VERTICAL_CONSTRAINT_FACTOR, 120);
+    wildcat = new Wildcat(100, height*currentSizing["wildcat"], currentSizing["wildcatSize"]);
 
     // setup sounds and images
     backgroundImage = bgTunnelImage;
@@ -112,10 +157,10 @@ function setup() {
     // create obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = random(800, 1000)
-        obstacles.push( new Obstacle(width*2 + xoff*i, height*.86, 120, obstacleImage) );
+        obstacles.push( new Obstacle(width*2 + xoff*i, height*currentSizing["cones"], currentSizing["coneSize"], obstacleImage) );
     }
 
-    bird = new Bird(width*3, height*.7, 100, flyingObstacleFrames, false);
+    bird = new Bird(width*3, height*currentSizing["bird"], currentSizing["birdSize"], flyingObstacleFrames, false);
 
     imageMode(CENTER);
     textFont(pressStartFont);
@@ -140,7 +185,7 @@ function draw() {
     // display starting title card
     if (!started) {
         fill(255);
-        textSize(35);
+        textSize(currentSizing["titleSize"]);
         text('Wildcat\nRunner\n2022', width/2, height*.3);
 
         fill(`rgba(255, 255, 255, ${.45*Math.sin(millis()*.002)+.55})`);
@@ -164,9 +209,9 @@ function draw() {
         fill(255);
         textSize(12);
         if (highScore)
-            text(`HI ${highScore.toString().padStart(5, '0')} ${Math.floor(score).toString().padStart(5, '0')}`, width*0.856, height*0.1);
+            text(`HI ${highScore.toString().padStart(5, '0')} ${Math.floor(score).toString().padStart(5, '0')}`, width*currentSizing["hiScore"], height*0.1);
         else
-            text(`${Math.floor(score).toString().padStart(5, '0')}`, width*0.9, height*0.1);
+            text(`${Math.floor(score).toString().padStart(5, '0')}`, width*.88, height*0.1);
     }
 
     // transition
@@ -252,8 +297,8 @@ function draw() {
 function keyPressed() {
     if (keyCode == 32) {
         if (!started && backgroundMusic != undefined) {
-            started = true;
-            backgroundMusic.play();
+            start();
+            return;
         }
 
         handleJump();
@@ -268,8 +313,8 @@ function touchStarted() {
         return;
 
     if (!started) {
-        started = true;
-        backgroundMusic.play();
+        start();
+        return;
     }
 
     handleJump();
@@ -278,16 +323,26 @@ function touchStarted() {
 
 // handle jumping
 function handleJump() {
-    if (paused && !transitionTo)
+    if (over)
         restart();
-    else
+    else if (!paused)
         wildcat.jump();
+}
+
+
+// start the game
+function start() {
+    if (window.innerHeight > window.innerWidth)
+        return;
+
+    started = true;
+    backgroundMusic.play();
 }
 
 
 // pause the game
 function pause(toggle) {
-    if (!started)
+    if (!started || over)
         return;
 
     paused = toggle;
@@ -313,6 +368,8 @@ function gameOver() {
 // restart the game
 function restart() {
     paused = false;
+    over = false;
+    scene = 'tunnel';
 
     // reset scene
     backgroundImage = bgTunnelImage;
@@ -320,17 +377,23 @@ function restart() {
     obstacleImage = coneImage;
     flyingObstacleFrames = crowFrames;
     backgroundMusic = gameMusicTunnel;
+
+    backgroundMusic.stop();
     backgroundMusic.play();
+
+    if (!muted)
+        backgroundMusic.setVolume(1);
 
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = random(800, 1000)
         obstacles[i].x = width*2 + xoff*i;
-        obstacles[i].y = height*.86;
+        obstacles[i].y = height*currentSizing["cones"];
         obstacles[i].frame = obstacleImage;
-        obstacles[i].size = 120;
+        obstacles[i].size = currentSizing["coneSize"];
     }
     bird.x = width*2;
-    lastObstacle = bird;
+    bird.y = height*currentSizing["bird"];
+    lastObstacle = obstacles[NUM_OBSTACLES-1];
 
     bird.enabled = false;
     
@@ -340,5 +403,11 @@ function restart() {
 }
 
 
-
-
+function determineSizes() {
+    if (window.innerWidth < 640)
+        currentSizing = sizes["small"];
+    else if (window.innerWidth <= 1007)
+        currentSizing = sizes["medium"];
+    else if (window.innerWidth > 1007)
+        currentSizing = sizes["large"];
+}
