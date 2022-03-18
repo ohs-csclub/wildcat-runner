@@ -4,11 +4,14 @@ let obstacleMaxOff = 800;
 
 class Obstacle {
 
-    constructor(x, y, size, frame) {
+    constructor(x, y, size) {
         this.x = x;
         this.y = y;
         this.size = size;
-        this.frame = frame;
+
+        const randImg = randInt(0, 3);
+        this.frame = obstacleImages[randImg];
+        
         lastObstacle = this;
     }
 
@@ -21,7 +24,9 @@ class Obstacle {
 
         if (this.x < -this.size) {
             const xoff = random(obstacleMinOff, obstacleMaxOff);
+            const randImg = randInt(0, 3);
             this.x = lastObstacle.x + xoff;
+            this.frame = obstacleImages[randImg];
             lastObstacle = this;
         }
 

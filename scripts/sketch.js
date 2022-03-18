@@ -5,9 +5,9 @@ let bgTunnelImage;
 let bgGrassImage;
 let roadTunnelImage;
 let roadGrassImage;
-let treeImage;
-let coneImage;
 let retryImage;
+let treeImages = [];
+let coneImages = [];
 let wildcatFrames = [];
 let crowFrames = [];
 let clouds = [];
@@ -22,7 +22,7 @@ let gameMusicTunnel;
 // general variables
 let backgroundImage;
 let roadImage;
-let obstacleImage;
+let obstacleImages;
 let flyingObstacleFrames;
 let backgroundMusic;
 
@@ -110,8 +110,12 @@ function preload() {
     bgGrassImage = loadImage('./assets/bg2.png');
     roadTunnelImage = loadImage('./assets/road.png');
     roadGrassImage = loadImage('./assets/road2.png');
-    treeImage = loadImage('./assets/tree.png');
-    coneImage = loadImage('./assets/traffic_cone.png');
+    treeImages[0] = loadImage('./assets/tree.png');
+    treeImages[1] = loadImage('./assets/tree2.png');
+    treeImages[2] = loadImage('./assets/tree3.png');
+    coneImages[0] = loadImage('./assets/traffic_cone.png');
+    coneImages[1] = loadImage('./assets/traffic_cone2.png');
+    coneImages[2] = loadImage('./assets/traffic_cone3.png');
     retryImage = loadImage('./assets/retry.png');
 
     // frames
@@ -150,14 +154,14 @@ function setup() {
     // setup sounds and images
     backgroundImage = bgTunnelImage;
     roadImage = roadTunnelImage;
-    obstacleImage = coneImage;
+    obstacleImages = coneImages;
     flyingObstacleFrames = crowFrames;
     backgroundMusic = gameMusicTunnel;
 
     // create obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
-        const xoff = random(800, 1000)
-        obstacles.push( new Obstacle(width*2 + xoff*i, height*currentSizing["cones"], currentSizing["coneSize"], obstacleImage) );
+        const xoff = random(800, 1000);
+        obstacles.push( new Obstacle(width*2 + xoff*i, height*currentSizing["cones"], currentSizing["coneSize"]) );
     }
 
     bird = new Bird(width*3, height*currentSizing["bird"], currentSizing["birdSize"], flyingObstacleFrames, false);
@@ -374,7 +378,7 @@ function restart() {
     // reset scene
     backgroundImage = bgTunnelImage;
     roadImage = roadTunnelImage;
-    obstacleImage = coneImage;
+    obstacleImages = coneImages;
     flyingObstacleFrames = crowFrames;
     backgroundMusic = gameMusicTunnel;
 
@@ -386,9 +390,10 @@ function restart() {
 
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = random(800, 1000)
+        const randImg = randInt(0, 3);
         obstacles[i].x = width*2 + xoff*i;
         obstacles[i].y = height*currentSizing["cones"];
-        obstacles[i].frame = obstacleImage;
+        obstacles[i].frame = obstacleImages[randImg];
         obstacles[i].size = currentSizing["coneSize"];
     }
     bird.x = width*2;
@@ -410,4 +415,9 @@ function determineSizes() {
         currentSizing = sizes["medium"];
     else if (window.innerWidth > 1007)
         currentSizing = sizes["large"];
+}
+
+
+function randInt(min, max) {
+    return Math.floor(random(min, max));
 }
