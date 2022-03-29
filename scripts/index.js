@@ -8,7 +8,7 @@ window.addEventListener('resize', () => {
     const h = window.innerHeight * .8;
     resizeCanvas(w, h);
 
-    pause(true);
+    pauseGame(true);
 
     if (window.innerHeight > window.innerWidth) {
         modal.classList.remove('hidden');
@@ -35,6 +35,12 @@ window.addEventListener('resize', () => {
 });
 
 document.addEventListener('visibilitychange', (e) => {
+    if (!backgroundMusic)
+        return;
+
+    if (paused)
+        return;
+
     if (backgroundMusic.isPaused() && !paused)
         backgroundMusic.play();
     else if (backgroundMusic.isPlaying())
@@ -80,13 +86,13 @@ pauseButton.addEventListener('click', () => {
         pauseButton.classList.remove('fa-pause');
         pauseButton.classList.add('fa-play');
 
-        pause(true);
+        pauseGame(true);
     // unpause
     } else {
         pauseButton.classList.remove('fa-play');
         pauseButton.classList.add('fa-pause');
 
-        pause(false);
+        pauseGame(false);
     }
 });
 

@@ -11,6 +11,8 @@ let coneImages = [];
 let wildcatFrames = [];
 let crowFrames = [];
 let clouds = [];
+let tunnelObjects = [];
+let grassObjects = [];
 
 // sounds
 let failSound;
@@ -32,6 +34,7 @@ let pressStartFont;
 // variables
 const DEFAULT_ROAD_SPEED = -10;
 const NUM_OBSTACLES = 3;
+const NUM_BG_OBJECTS = 3;
 let roadOffset = 0;
 let roadSpeed = DEFAULT_ROAD_SPEED;
 let paused = false;
@@ -57,6 +60,7 @@ let hideScores = false;
 // objects
 let wildcat;
 let obstacles = [];
+let bgObjs = [];
 let bird;
 
 // sizes
@@ -71,7 +75,12 @@ const sizes = {
         "coneSize": 100,
         "treeSize": 130,
         "titleSize": 25,
-        "hiScore": .8
+        "hiScore": .8,
+        "bgObjSizeMin": .3,
+        "bgObjSizeMax": .4,
+        "bgObjYMin": .3,
+        "bgObjYMax": .35,
+        "bgObjVariance": 2.3
     },
     "medium": {
         "cones": 0.86,
@@ -83,7 +92,12 @@ const sizes = {
         "coneSize": 110,
         "treeSize": 140,
         "titleSize": 30,
-        "hiScore": .83
+        "hiScore": .83,
+        "bgObjSizeMin": .32,
+        "bgObjSizeMax": .45,
+        "bgObjYMin": .3,
+        "bgObjYMax": .38,
+        "bgObjVariance": 2.5
     },
     "large": {
         "cones": 0.86,
@@ -95,7 +109,12 @@ const sizes = {
         "coneSize": 120,
         "treeSize": 150,
         "titleSize": 35,
-        "hiScore": .856
+        "hiScore": .856,
+        "bgObjSizeMin": .45,
+        "bgObjSizeMax": .5,
+        "bgObjYMin": .3,
+        "bgObjYMax": .4,
+        "bgObjVariance": 2
     }
 }
 let currentSizing;
@@ -117,17 +136,53 @@ function preload() {
     coneImages[1] = loadImage('./assets/traffic_cone2.png');
     coneImages[2] = loadImage('./assets/traffic_cone3.png');
     retryImage = loadImage('./assets/retry.png');
+    
+    // tunnel
+    tunnelObjects[0] = loadImage('./assets/yearbook/anime_frame.png');
+    tunnelObjects[1] = loadImage('./assets/yearbook/avid_frame.png');
+    tunnelObjects[2] = loadImage('./assets/yearbook/buildon_frame.png');
+    tunnelObjects[3] = loadImage('./assets/yearbook/crosscountry_frame.png');
+    tunnelObjects[4] = loadImage('./assets/yearbook/csclub_frame.png');
+    tunnelObjects[5] = loadImage('./assets/yearbook/esa_frame.png');
+    tunnelObjects[6] = loadImage('./assets/yearbook/football_frame.png');
+    tunnelObjects[7] = loadImage('./assets/yearbook/glee_frame.png');
+    tunnelObjects[8] = loadImage('./assets/yearbook/keyclub_frame.png');
+    tunnelObjects[9] = loadImage('./assets/yearbook/latinosunidos_frame.png');
+    tunnelObjects[10] = loadImage('./assets/yearbook/pfec_frame.png');
+    tunnelObjects[11] = loadImage('./assets/yearbook/senior_frame.png');
+    tunnelObjects[12] = loadImage('./assets/yearbook/staff_frame.png');
+    tunnelObjects[13] = loadImage('./assets/yearbook/staff_frame2.png');
+    tunnelObjects[14] = loadImage('./assets/yearbook/staff_frame3.png');
+    tunnelObjects[15] = loadImage('./assets/yearbook/staff_frame4.png');
+    tunnelObjects[16] = loadImage('./assets/yearbook/staff_frame5.png');
+    tunnelObjects[17] = loadImage('./assets/yearbook/tennis_frame.png');
+    tunnelObjects[18] = loadImage('./assets/yearbook/twin_frame.png');
+    tunnelObjects[19] = loadImage('./assets/yearbook/twin_frame2.png');
+    tunnelObjects[20] = loadImage('./assets/yearbook/vaamp_frame.png');
+    tunnelObjects[21] = loadImage('./assets/yearbook/volleyball_frame.png');
+    tunnelObjects[22] = loadImage('./assets/yearbook/basketball_frame.png');
 
+    // grass
+    grassObjects[0] = loadImage('./assets/yearbook/bsu_plane.png');
+    grassObjects[1] = loadImage('./assets/yearbook/cambodian_plane.png');
+    grassObjects[2] = loadImage('./assets/yearbook/idea_plane.png');
+    grassObjects[3] = loadImage('./assets/yearbook/lacrosse_plane.png');
+    grassObjects[4] = loadImage('./assets/yearbook/lsj_plane.png');
+    grassObjects[5] = loadImage('./assets/yearbook/orchestra_plane.png');
+    grassObjects[6] = loadImage('./assets/yearbook/quizbowl_plane.png');
+    grassObjects[7] = loadImage('./assets/yearbook/soccer_plane.png');
+    grassObjects[8] = loadImage('./assets/yearbook/swim_plane.png');
+    grassObjects[9] = loadImage('./assets/yearbook/vaamp_plane.png');
+    grassObjects[10] = loadImage('./assets/yearbook/volleyball_plane.png');
+    grassObjects[11] = loadImage('./assets/cloud1.png');
+    grassObjects[12] = loadImage('./assets/cloud2.png');
+    grassObjects[13] = loadImage('./assets/cloud3.png');
+    
     // frames
     wildcatFrames[0] = loadImage('./assets/wildcat.png');
     wildcatFrames[1] = loadImage('./assets/wildcat2.png');
     crowFrames[0] = loadImage('./assets/crow.png');
     crowFrames[1] = loadImage('./assets/crow2.png');
-
-    // variants
-    clouds[0] = loadImage('./assets/cloud1.png');
-    clouds[1] = loadImage('./assets/cloud2.png');
-    clouds[2] = loadImage('./assets/cloud3.png');
 
     // sounds
     failSound = loadSound('./assets/Fail.wav');
@@ -166,6 +221,15 @@ function setup() {
 
     bird = new Bird(width*3, height*currentSizing["bird"], currentSizing["birdSize"], flyingObstacleFrames, false);
 
+    // create background objects
+    for (let i = 0; i < NUM_BG_OBJECTS; i++) {
+        const x = random(width*1.5, width*currentSizing["bgObjVariance"]);
+        const y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);
+        const s = random(currentSizing["bgObjSizeMin"], currentSizing["bgObjSizeMax"]);
+        bgObjs.push( new BackgroundObject(x*(i+1), y, DEFAULT_ROAD_SPEED/3, s, tunnelObjects) );
+    }
+
+    // set drawing settings
     imageMode(CENTER);
     textFont(pressStartFont);
     textAlign(CENTER);
@@ -184,6 +248,15 @@ function draw() {
 
     // background
     image(backgroundImage, width/2, height/2, width, height);
+    
+    // handle background objects
+    for (bgo of bgObjs) {
+        if (started && !paused)
+            bgo.update();
+        bgo.show();
+    }
+
+    // road
     image(roadImage, width + roadOffset, height/2, width*2, height);
 
     // display starting title card
@@ -247,6 +320,8 @@ function draw() {
         wildcat.show();
         for (obstacle of obstacles)
             obstacle.show();
+        for (bgo of bgObjs)
+            bgo.show();
         bird.show();
 
         // show game over text
@@ -307,7 +382,7 @@ function keyPressed() {
 
         handleJump();
     } else if (started && (keyCode == 27 || keyCode == 80)) {
-        pause(!paused);
+        pauseGame(!paused);
     }
 }
 
@@ -336,7 +411,7 @@ function handleJump() {
 
 // start the game
 function start() {
-    if (window.innerHeight > window.innerWidth)
+    if (window.innerHeight > window.innerWidth || !backgroundMusic)
         return;
 
     started = true;
@@ -345,7 +420,7 @@ function start() {
 
 
 // pause the game
-function pause(toggle) {
+function pauseGame(toggle) {
     if (!started || over)
         return;
 
@@ -361,7 +436,7 @@ function pause(toggle) {
 
 // declare game over
 function gameOver() {
-    pause(true);
+    pauseGame(true);
     over = true;
     if (score > highScore)
         highScore = Math.floor(score);
@@ -388,6 +463,7 @@ function restart() {
     if (!muted)
         backgroundMusic.setVolume(1);
 
+    // reset obstacles
     for (let i = 0; i < NUM_OBSTACLES; i++) {
         const xoff = random(800, 1000)
         const randImg = randInt(0, 3);
@@ -398,10 +474,23 @@ function restart() {
     }
     bird.x = width*2;
     bird.y = height*currentSizing["bird"];
-    lastObstacle = obstacles[NUM_OBSTACLES-1];
-
     bird.enabled = false;
+    lastObstacle = obstacles[NUM_OBSTACLES-1];
     
+    // reset objects
+    for (let i = 0; i < NUM_BG_OBJECTS; i++) {
+        const x = random(width, width*currentSizing["bgObjVariance"]);
+        const y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);
+        const s = random(currentSizing["bgObjSizeMin"], currentSizing["bgObjSizeMax"]);
+        bgObjs[i].x = x*(i+1);
+        bgObjs[i].y = y;
+        bgObjs[i].size = s;
+        bgObjs[i].frames = tunnelObjects;
+        bgObjs[i].frame = tunnelObjects[ randInt(0, tunnelObjects.length) ];
+    }
+    lastBackgroundObject = bgObjs[bgObjs.length-1]
+
+    // reset variables
     score = 0;
     flashCooldown = MAX_FLASH_COOLDOWN;
     roadSpeed = DEFAULT_ROAD_SPEED;
