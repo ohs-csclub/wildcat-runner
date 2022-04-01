@@ -78,7 +78,7 @@ button.addEventListener('click', (e) => {
 
 const pauseButton = document.getElementById('pause');
 pauseButton.addEventListener('click', () => {
-    if (!started || over)
+    if (!started || over || transitioning)
         return;
 
     // pause

@@ -22,7 +22,7 @@ class Obstacle {
     update() {
         this.x += roadSpeed;
 
-        if (this.x < -this.size) {
+        if (this.x < -this.size && objectReset) {
             const xoff = random(obstacleMinOff, obstacleMaxOff);
             const randImg = randInt(0, 3);
             this.x = lastObstacle.x + xoff;

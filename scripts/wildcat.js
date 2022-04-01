@@ -23,6 +23,10 @@ class Wildcat {
     }
 
     update() {
+        if (slowdownCamera) {
+            this.x += roadSpeed - DEFAULT_ROAD_SPEED;
+        }
+
         if (this.yvel >= 0) {
             this.frameTime -= 1/60;
             if (this.frameTime <= 0) {

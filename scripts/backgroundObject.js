@@ -22,7 +22,7 @@ class BackgroundObject {
     update() {
         this.x += this.velx;
 
-        if (this.x < -this.frame.width - width/2) {
+        if (this.x < -this.frame.width*this.size && objectReset) {
             const offset = random(width, width*currentSizing["bgObjVariance"])
             this.x = lastBackgroundObject.x + lastBackgroundObject.frame.width*lastBackgroundObject.size + offset;
             this.y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);

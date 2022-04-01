@@ -32,7 +32,7 @@ class Bird {
 
         this.x += roadSpeed;
 
-        if (this.x < this.randomOffset) {
+        if (this.x < this.randomOffset && objectReset) {
             const xoff = random(400, 550);
             this.x = lastObstacle.x + xoff;
             lastObstacle = this;

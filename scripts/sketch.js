@@ -3,6 +3,7 @@
 // images
 let bgTunnelImage;
 let bgGrassImage;
+let bgGrassImageExtended;
 let roadTunnelImage;
 let roadGrassImage;
 let retryImage;
@@ -19,6 +20,7 @@ let failSound;
 let scoreSound;
 let jumpSound;
 let gameMusicGrass;
+let gameMusicGrassShortened;
 let gameMusicTunnel;
 
 // general variables
@@ -46,6 +48,7 @@ let scene = 'tunnel';
 // transition
 let transitionTime = 0;
 let transitionTo;
+let transitioning = false;
 const TRANSITION_DURATION = 1;
 
 // scores
@@ -75,7 +78,11 @@ const sizes = {
         "birdSize": 80,
         "coneSize": 100,
         "treeSize": 120,
-        "titleSize": 25,
+        "titleSize": 18,
+        "subTextSize": 10,
+        "endTextSize": 10,
+        "endTextSpacing": 20,
+        "endScrollSpeed": 0.7,
         "hiScore": .8,
         "bgObjSizeMin": .3,
         "bgObjSizeMax": .36,
@@ -95,6 +102,10 @@ const sizes = {
         "coneSize": 115,
         "treeSize": 140,
         "titleSize": 30,
+        "subTextSize": 11,
+        "endTextSize": 16,
+        "endTextSpacing": 28,
+        "endScrollSpeed": 0.85,
         "hiScore": .83,
         "bgObjSizeMin": .4,
         "bgObjSizeMax": .46,
@@ -114,6 +125,10 @@ const sizes = {
         "coneSize": 120,
         "treeSize": 150,
         "titleSize": 35,
+        "subTextSize": 12,
+        "endTextSize": 16,
+        "endTextSpacing": 40,
+        "endScrollSpeed": 1,
         "hiScore": .856,
         "bgObjSizeMin": .45,
         "bgObjSizeMax": .5,
@@ -133,6 +148,7 @@ function preload() {
     // images
     bgTunnelImage = loadImage('./assets/bg.png');
     bgGrassImage = loadImage('./assets/bg2.png');
+    bgGrassImageExtended = loadImage('./assets/bg2_extended.png');
     roadTunnelImage = loadImage('./assets/road.png');
     roadGrassImage = loadImage('./assets/road2.png');
     treeImages[0] = loadImage('./assets/tree.png');
@@ -183,6 +199,7 @@ function preload() {
     grassObjects[11] = loadImage('./assets/cloud1.png');
     grassObjects[12] = loadImage('./assets/cloud2.png');
     grassObjects[13] = loadImage('./assets/cloud3.png');
+    grassObjects[14] = loadImage('./assets/blimp.png');
     
     // frames
     wildcatFrames[0] = loadImage('./assets/wildcat.png');
@@ -196,6 +213,7 @@ function preload() {
     scoreSound = loadSound('./assets/Score.wav');
     gameMusicTunnel = loadSound('./assets/Game Music Ghostly.mp3');
     gameMusicGrass = loadSound('./assets/Game Music.mp3');
+    gameMusicGrassShortened = loadSound('./assets/Game Music Shortened.mp3');
 
     // font
     pressStartFont = loadFont('./assets/PressStart2P-Regular.ttf');
@@ -238,7 +256,7 @@ function setup() {
     // set drawing settings
     imageMode(CENTER);
     textFont(pressStartFont);
-    textAlign(CENTER);
+    textAlign(CENTER, TOP);
 
     // mute
     if (muted) {
@@ -251,6 +269,11 @@ function setup() {
 
 function draw() {
     background(220);
+
+    if (showingCredits) {
+        endAnim();
+        return;
+    }
 
     // background
     image(backgroundImage, width/2, height/2, width, height);
@@ -269,10 +292,10 @@ function draw() {
     if (!started) {
         fill(255);
         textSize(currentSizing["titleSize"]);
-        text('Wildcat\nRunner\n2022', width/2, height*.3);
+        text('Wildcat\nRunner\n2022', width/2, height*.29);
 
         fill(`rgba(255, 255, 255, ${.45*Math.sin(millis()*.002)+.55})`);
-        textSize(12);
+        textSize(currentSizing["subTextSize"]);
         text('Press space to start', width/2, height*.62);
 
         wildcat.show();
@@ -314,6 +337,7 @@ function draw() {
         } else if (transitionTime <= 0) {
             transitionTo = null;
             paused = false;
+            transitioning = false;
         }
 
         return;
@@ -341,23 +365,44 @@ function draw() {
 
     // updating score
     score += 8/60;
-    if (flashCooldown <= 0 && Math.floor(score) % 100 == 0) {
+    if (flashCooldown <= 0 && Math.floor(score) % 100 == 0 && !hideScores) {
         scoreSound.play();
         blinkFrames = BLINK_FRAME_DURATION;
         flashCooldown = MAX_FLASH_COOLDOWN;
 
-        roadSpeed -= currentSizing["roadAcceleration"];
-        obstacleMinOff += 20;
-        obstacleMaxOff += 20;
+        if (!slowdownCamera) {
+            roadSpeed -= currentSizing["roadAcceleration"];
+            obstacleMinOff += 20;
+            obstacleMaxOff += 20;
+        }
     } else
         flashCooldown -= 1/60;
+
+    if (slowdownCamera) {
+        roadSpeed *= 0.99;
+    }
 
     // transition
     if (Math.floor(score) == 350) {
         paused = true;
+        transitioning = true;
         transitionTime = TRANSITION_DURATION;
         transitionTo = "grass";
         gameMusicTunnel.stop();
+    } else if (!displayedCredits) {
+        if (Math.floor(score) == 970) {
+            endAnimPrep();
+        } else if (Math.floor(score) == 990) {
+            // slow camera to a pause
+            slowdownCamera = true;
+            saveRoadSpeed = roadSpeed;
+
+            hideScores = true;
+        } else if (Math.floor(score) == 1030) {
+            paused = true;
+            transitioning = true;
+            startEndAnimation();
+        }
     }
 
     // handle road movement
@@ -414,6 +459,8 @@ function handleJump() {
         restart();
     else if (!paused)
         wildcat.jump();
+    else if (showingCredits && displayedCredits)
+        continueGame();
 }
 
 
@@ -429,7 +476,7 @@ function start() {
 
 // pause the game
 function pauseGame(toggle) {
-    if (!started || over)
+    if (!started || over || transitioning)
         return;
 
     paused = toggle;
@@ -508,16 +555,6 @@ function restart() {
 }
 
 
-function determineSizes() {
-    if (window.innerWidth < 640)
-        currentSizing = sizes["small"];
-    else if (window.innerWidth <= 1007)
-        currentSizing = sizes["medium"];
-    else if (window.innerWidth > 1007)
-        currentSizing = sizes["large"];
-}
 
 
-function randInt(min, max) {
-    return Math.floor(random(min, max));
-}
+
