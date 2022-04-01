@@ -69,42 +69,47 @@ const sizes = {
         "cones": 0.86,
         "trees": 0.85,
         "bird": 0.47,
-        "wildcat": 0.86,
-        "wildcatSize": 100,
+        "wildcatY": 0.86,
+        "wildcatSize": 90,
+        "wildcatBoost": -11,
         "birdSize": 80,
         "coneSize": 100,
-        "treeSize": 130,
+        "treeSize": 120,
         "titleSize": 25,
         "hiScore": .8,
         "bgObjSizeMin": .3,
-        "bgObjSizeMax": .4,
-        "bgObjYMin": .3,
+        "bgObjSizeMax": .36,
+        "bgObjYMin": .32,
         "bgObjYMax": .35,
-        "bgObjVariance": 2.3
+        "bgObjVariance": 2.3,
+        "roadAcceleration": 0.25
     },
     "medium": {
         "cones": 0.86,
         "trees": 0.85,
         "bird": 0.55,
-        "wildcat": 0.86,
-        "wildcatSize": 110,
+        "wildcatY": 0.86,
+        "wildcatSize": 105,
+        "wildcatBoost": -12,
         "birdSize": 90,
-        "coneSize": 110,
+        "coneSize": 115,
         "treeSize": 140,
         "titleSize": 30,
         "hiScore": .83,
-        "bgObjSizeMin": .32,
-        "bgObjSizeMax": .45,
+        "bgObjSizeMin": .4,
+        "bgObjSizeMax": .46,
         "bgObjYMin": .3,
         "bgObjYMax": .38,
-        "bgObjVariance": 2.5
+        "bgObjVariance": 2.5,
+        "roadAcceleration": 0.4
     },
     "large": {
         "cones": 0.86,
         "trees": 0.85,
         "bird": 0.65,
-        "wildcat": 0.86,
+        "wildcatY": 0.86,
         "wildcatSize": 120,
+        "wildcatBoost": -12,
         "birdSize": 100,
         "coneSize": 120,
         "treeSize": 150,
@@ -114,7 +119,8 @@ const sizes = {
         "bgObjSizeMax": .5,
         "bgObjYMin": .3,
         "bgObjYMax": .4,
-        "bgObjVariance": 2
+        "bgObjVariance": 2,
+        "roadAcceleration": 0.5
     }
 }
 let currentSizing;
@@ -204,7 +210,7 @@ function setup() {
     const canvas = document.querySelector('canvas');
     document.querySelector('.container').appendChild(canvas);
 
-    wildcat = new Wildcat(100, height*currentSizing["wildcat"], currentSizing["wildcatSize"]);
+    wildcat = new Wildcat(100, height*currentSizing["wildcatY"], currentSizing["wildcatSize"]);
 
     // setup sounds and images
     backgroundImage = bgTunnelImage;
@@ -340,7 +346,9 @@ function draw() {
         blinkFrames = BLINK_FRAME_DURATION;
         flashCooldown = MAX_FLASH_COOLDOWN;
 
-        roadSpeed -= 0.5;
+        roadSpeed -= currentSizing["roadAcceleration"];
+        obstacleMinOff += 20;
+        obstacleMaxOff += 20;
     } else
         flashCooldown -= 1/60;
 
@@ -478,22 +486,25 @@ function restart() {
     lastObstacle = obstacles[NUM_OBSTACLES-1];
     
     // reset objects
+    lastBackgroundObject.x = random(width, width*currentSizing["bgObjVariance"]);
     for (let i = 0; i < NUM_BG_OBJECTS; i++) {
         const x = random(width, width*currentSizing["bgObjVariance"]);
         const y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);
         const s = random(currentSizing["bgObjSizeMin"], currentSizing["bgObjSizeMax"]);
-        bgObjs[i].x = x*(i+1);
+        bgObjs[i].x = lastBackgroundObject.x + x;
         bgObjs[i].y = y;
         bgObjs[i].size = s;
         bgObjs[i].frames = tunnelObjects;
         bgObjs[i].frame = tunnelObjects[ randInt(0, tunnelObjects.length) ];
+        lastBackgroundObject = bgObjs[i];
     }
-    lastBackgroundObject = bgObjs[bgObjs.length-1]
 
     // reset variables
     score = 0;
     flashCooldown = MAX_FLASH_COOLDOWN;
     roadSpeed = DEFAULT_ROAD_SPEED;
+    obstacleMinOff = 600;
+    obstacleMaxOff = 800;
 }
 
 

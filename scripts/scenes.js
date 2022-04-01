@@ -52,17 +52,18 @@ function switchToGrass() {
     bird.enabled = true;
 
     // update background objects
+    lastBackgroundObject.x = random(width, width*currentSizing["bgObjVariance"]);
     for (let i = 0; i < NUM_BG_OBJECTS; i++) {
         const x = random(width, width*currentSizing["bgObjVariance"]);
         const y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);
         const s = random(currentSizing["bgObjSizeMin"], currentSizing["bgObjSizeMax"]);
-        bgObjs[i].x = x*(i+1);
+        bgObjs[i].x = lastBackgroundObject.x + x;
         bgObjs[i].y = y;
         bgObjs[i].size = s;
         bgObjs[i].frames = grassObjects;
         bgObjs[i].frame = grassObjects[ randInt(0, grassObjects.length) ];
+        lastBackgroundObject = bgObjs[i];
     }
-    lastBackgroundObject = bgObjs[bgObjs.length-1];
 
 }
 

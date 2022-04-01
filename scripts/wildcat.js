@@ -34,16 +34,16 @@ class Wildcat {
         this.y += this.yvel;
         this.yvel += GRAVITY;
 
-        if (this.y >= height*currentSizing['wildcat']) {
+        if (this.y >= height*currentSizing['wildcatY']) {
             this.jumps = MAX_JUMPS;
         }
-        this.y = constrain(this.y, this.size, height*currentSizing['wildcat']);
+        this.y = constrain(this.y, this.size, height*currentSizing['wildcatY']);
     }
 
     jump() {
         if (this.jumps <= 0) return;
 
-        this.yvel = -12;
+        this.yvel = currentSizing["wildcatBoost"];
         this.jumps--;
         jumpSound.play();
     }
