@@ -137,12 +137,12 @@ function endAnim() {
         // display title
         fill(255);
         textSize(currentSizing["titleSize"]);
-        text('The End', width/2, height*.4);
+        text('Continue?', width/2, height*.4);
 
         // continue
         fill(`rgba(255, 255, 255, ${.45*Math.sin(millis()*.002)+.55})`);
         textSize(12);
-        text('Press space to continue', width/2, height*.62);
+        text('Press space to resume', width/2, height*.62);
 
         displayedCredits = true;
         return;
@@ -216,7 +216,7 @@ function continueGame() {
     bird.enabled = true;
 
     // update background objects
-    lastBackgroundObject.x = random(width, width*currentSizing["bgObjVariance"]);
+    lastBackgroundObject.x = 0;
     for (let i = 0; i < NUM_BG_OBJECTS; i++) {
         const x = random(width, width*currentSizing["bgObjVariance"]);
         const y = random(height*currentSizing["bgObjYMin"], height*currentSizing["bgObjYMax"]);

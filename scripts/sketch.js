@@ -49,10 +49,10 @@ let scene = 'tunnel';
 let transitionTime = 0;
 let transitionTo;
 let transitioning = false;
-const TRANSITION_DURATION = 1;
+const TRANSITION_DURATION = 0.5;
 
 // scores
-let score = 0;
+let score = 340;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
@@ -325,13 +325,14 @@ function draw() {
         score += 8/60;
         transitionTime -= 1/60;
         
-        const alpha = Math.max(0, Math.sin(transitionTime/TRANSITION_DURATION*Math.PI));
-        background(`rgba(0, 0, 0, ${alpha})`);
-        
         // show wildcat
+        wildcat.update();
         wildcat.show();
 
-        if (transitionTime <= .5 && transitionTo == "grass") {
+        const alpha = constrain(Math.sin(transitionTime/TRANSITION_DURATION*Math.PI), 0, 1);
+        background(`rgba(255, 255, 255, ${round(alpha, 2)})`);
+
+        if (transitionTime < TRANSITION_DURATION/2 && transitionTo == "grass") {
             switchToGrass();
             transitionTo = "end";
         } else if (transitionTime <= 0) {
