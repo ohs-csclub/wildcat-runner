@@ -52,7 +52,7 @@ let transitioning = false;
 const TRANSITION_DURATION = 0.5;
 
 // scores
-let score = 340;
+let score = 0;
 let highScore = 0;
 const MAX_FLASH_COOLDOWN = 1;
 const BLINK_FRAME_DURATION = 60;
@@ -326,7 +326,6 @@ function draw() {
         transitionTime -= 1/60;
         
         // show wildcat
-        wildcat.update();
         wildcat.show();
 
         const alpha = constrain(Math.sin(transitionTime/TRANSITION_DURATION*Math.PI), 0, 1);
@@ -373,8 +372,8 @@ function draw() {
 
         if (!slowdownCamera) {
             roadSpeed -= currentSizing["roadAcceleration"];
-            obstacleMinOff += 20;
-            obstacleMaxOff += 20;
+            obstacleMinOff += 15;
+            obstacleMaxOff += 15;
         }
     } else
         flashCooldown -= 1/60;
